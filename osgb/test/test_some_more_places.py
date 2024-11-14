@@ -56,6 +56,8 @@ def test_grid_formatting():
     assert osgb.format_grid(osgb.parse_grid('TQ103606')) == 'TQ 103 606'
     assert osgb.format_grid(osgb.parse_grid('HY 554 300')) == 'HY 554 300'
     assert osgb.format_grid(osgb.parse_grid('40/975948')) == 'NM 975 948'
+    assert osgb.format_grid(osgb.parse_grid('SJ681751200191'), form='SS EEEEEE NNNNNN') == 'SJ 681751 200191'
+    assert osgb.format_grid(osgb.parse_grid('SJ609447127196'), form='SS EEEEEE NNNNNN') == 'SJ 609447 127196'
 
 
 def test_greenwich():

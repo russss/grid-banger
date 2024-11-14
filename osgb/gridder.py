@@ -341,8 +341,8 @@ def format_grid(easting, northing=None, form='SS EEE NNN'):
     else:
         raise FarFarAwayError(easting, northing)
 
-    e = int(easting % MINOR_GRID_SQ_SIZE)
-    n = int(northing % MINOR_GRID_SQ_SIZE)
+    e = easting % MINOR_GRID_SQ_SIZE
+    n = northing % MINOR_GRID_SQ_SIZE
 
     # special cases
     ff = form.upper()
@@ -353,13 +353,16 @@ def format_grid(easting, northing=None, form='SS EEE NNN'):
     elif ff == 'SS':
         return sq
 
-    m = re.match(r'S{1,2}(\s*)(E{1,5})(\s*)(N{1,5})', ff)
+    m = re.match(r'S{1,2}(\s*)(E{1,})(\s*)(N{1,})', ff)
     if m is None:
         raise FaultyFormError(form)
 
     (space_a, e_spec, space_b, n_spec) = m.group(1, 2, 3, 4)
-    e = int(e / 10 ** (5 - len(e_spec)))
-    n = int(n / 10 ** (5 - len(n_spec)))
+
+    # Rounding to 2 decimal places before truncating is needed to avoid floating point errors,
+    # without rounding coordinates up to the next grid square
+    e = int(round(e / 10 ** (5 - len(e_spec)), 2))
+    n = int(round(n / 10 ** (5 - len(n_spec)), 2))
 
     return sq \
         + space_a + '{0:0{1}d}'.format(e, len(e_spec)) \
@@ -664,7 +667,7 @@ def _get_eastings_northings(s):
     elif len(t) == 1:
         gr = t[0]
         f = len(gr)
-        if f in [2, 4, 6, 8, 10]:
+        if f % 2 == 0:
             f = int(f / 2)
             e, n = (gr[:f], gr[f:])
         else:
@@ -672,7 +675,7 @@ def _get_eastings_northings(s):
     else:
         return None
 
-    figs = min(5, max(len(e), len(n)))
+    figs = max(len(e), len(n))
     return (int(e) * 10 ** (5 - figs), int(n) * 10 ** (5 - figs))
 
 
